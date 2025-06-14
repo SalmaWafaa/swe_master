@@ -23,7 +23,7 @@
             <tbody>
                 <?php foreach ($cartItems as $item): ?>
                     <tr>
-                        <td><img src="/ecommerce_master/uploads/<?= htmlspecialchars($item['product_image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>" width="80"></td>
+                        <td><img src="./uploads/<?= htmlspecialchars($item['product_image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>" width="80"></td>
                         <td><?= htmlspecialchars($item['name']) ?></td>
                         <td><?= htmlspecialchars($item['quantity']) ?></td>
                         <td>$<?= htmlspecialchars(number_format($item['price'], 2)) ?></td>

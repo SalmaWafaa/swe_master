@@ -106,7 +106,7 @@ class UserController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'];
             $password = $_POST['password'];
-            $return_url = $_POST['return_url'] ?? '/ecommerce_master/index.php';
+            $return_url = $_POST['return_url'] ?? '/swe_master/index.php';
     
             $result = $this->login($email, $password);
     

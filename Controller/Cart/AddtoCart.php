@@ -18,6 +18,6 @@ if (!$cartId) {
 
 $cartModel->addItemToCart($cartId, $productId, 1);
 
-header('Location: /ecommerce_master/View/Cart/CartView.php');
+header('Location: /swe_master/View/Cart/CartView.php');
 exit;
 ?>

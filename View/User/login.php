@@ -109,7 +109,7 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Enter your password" required>
             </div>
-            <input type="hidden" name="return_url" value="<?php echo isset($_SERVER['HTTP_REFERER']) ? htmlspecialchars($_SERVER['HTTP_REFERER']) : '/ecommerce_master/index.php'; ?>">
+            <input type="hidden" name="return_url" value="<?php echo isset($_SERVER['HTTP_REFERER']) ? htmlspecialchars($_SERVER['HTTP_REFERER']) : '/swe_master/index.php'; ?>">
             <button type="submit">Login</button>
         </form>
         <div class="register-link">

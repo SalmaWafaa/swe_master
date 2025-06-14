@@ -22,7 +22,7 @@ class ProductController {
         $productId = $this->getProductIdFromRequest();
         if (!$productId) {
             // Handle invalid/missing ID - redirect or show error
-            header('Location: /ecommerce_master/index.php?error=InvalidProductID');
+            header('Location: /swe_master/index.php?error=InvalidProductID');
             exit();
         }
     
@@ -44,12 +44,12 @@ class ProductController {
                 // Include the product details page
                 include __DIR__ . '/../View/products/product_details.php';
             } else {
-                header('Location: /ecommerce_master/index.php?error=ProductNotFound');
+                header('Location: /swe_master/index.php?error=ProductNotFound');
                 exit();
             }
         } catch (\Exception $e) {
             error_log("Error in viewProductDetails (ID: $productId): " . $e->getMessage());
-            header('Location: /ecommerce_master/index.php?error=ServerError');
+            header('Location: /swe_master/index.php?error=ServerError');
             exit();
         }
     }
