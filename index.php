@@ -64,8 +64,19 @@ try {
     } elseif ($controllerName === 'User' && $actionName === 'updateProfile' && $_SERVER['REQUEST_METHOD'] === 'POST') {
          $actionName = 'handleUpdateProfile'; // Example mapping
     }
-    
-    
+    elseif ($controllerName === 'Cart') {
+        if ($actionName === 'addToCart') {
+            require_once __DIR__ . '/Controller/Cart/AddtoCart.php';
+            exit();
+        }
+    }
+    elseif ($controllerName === 'Cart' && $actionName === 'viewCart') {
+        require_once __DIR__ . '/Controller/Cart/CartController.php';
+        $cartController = new RCartController();
+        $cartController->viewCart();
+        exit();
+    }
+
     else {
         // For other actions, pass only the relevant GET parameters
         $params = array_values(array_filter($_GET, function($key) {

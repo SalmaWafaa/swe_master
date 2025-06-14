@@ -1,33 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Products</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .product { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
-        .product h3 { margin: 0; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <link rel="stylesheet" href="assets/css/product.css">
 </head>
 <body>
-    <h1>Products</h1>
-    <button onclick="window.location.href='index.php?controller=Product&action=addProductForm'">
-        Add Product
-    </button>
-    <br><br>
-    <?php foreach ($products as $product): ?>
-        <div class="product">
-            <h3><?= $product['name'] ?></h3>
-            <p>Price: $<?= $product['price'] ?></p>
-            <p>Colors: <?= implode(", ", json_decode($product['colors'])) ?></p>
-            <p>Sizes: <?= implode(", ", json_decode($product['sizes'])) ?></p>
-            <p>Rating: <?= $product['rate'] ?> / 5</p>
-            <button onclick="window.location.href='index.php?controller=Product&action=editProductForm&id=<?= $product['id'] ?>'">
-                Edit
-            </button>
-            <button onclick="window.location.href='index.php?controller=Product&action=deleteProductForm&id=<?= $product['id'] ?>'">
-                Delete
-            </button>
+    <div class="product-list-container">
+        <h1>Product List</h1>
+        
+        <?php if (!empty($message)): ?>
+            <div class="message"><?= htmlspecialchars($message) ?></div>
+        <?php endif; ?>
+        
+        <?php if (!empty($error)): ?>
+            <div class="error"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        
+        <div class="product-actions">
+            <a href="index.php?controller=Product&action=showAddProductForm" class="btn">Add New Product</a>
         </div>
-    <?php endforeach; ?>
+        
+        <div class="products-grid">
+            <?php foreach ($products as $product): ?>
+                <div class="product-card">
+                    <?php 
+                    $iterator = $productModel->getProductIterator(['id' => $product['id']]);
+                    $images = $iterator->getRelatedData($product['id'], 'productimages');
+                    ?>
+                    
+                    <?php if (!empty($images)): ?>
+                        <img src="<?= htmlspecialchars($images[0]['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                    <?php endif; ?>
+                    
+                    <h3><?= htmlspecialchars($product['name']) ?></h3>
+                    <p>$<?= number_format($product['price'], 2) ?></p>
+                    
+                    <div class="product-actions">
+                        <a href="index.php?controller=Product&action=viewProductDetails&id=<?= $product['id'] ?>" class="btn">View</a>
+                        <a href="index.php?controller=Product&action=showEditProductForm&id=<?= $product['id'] ?>" class="btn">Edit</a>
+                        <a href="index.php?controller=Product&action=handleDeleteProduct&id=<?= $product['id'] ?>" 
+                           class="btn danger" 
+                           onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
 </body>
 </html>

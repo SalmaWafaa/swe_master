@@ -43,11 +43,11 @@
     <?php endif; ?>
     <?php if (isset($_SESSION['login_error'])): ?>
         <p class="feedback error"><?php echo htmlspecialchars($_SESSION['login_error']); ?></p>
-        <?php unset($_SESSION['login_error']); // Clear message after displaying ?>
+        <?php unset($_SESSION['login_error']);  ?>
     <?php endif; ?>
     <?php if (isset($_SESSION['register_error'])): ?>
         <p class="feedback error"><?php echo htmlspecialchars($_SESSION['register_error']); ?></p>
-        <?php unset($_SESSION['register_error']); // Clear message after displaying ?>
+        <?php unset($_SESSION['register_error']);  ?>
     <?php endif; ?>
 
     <?php if ($isAdmin): ?>
@@ -135,13 +135,11 @@
         background-color: #f8d7da;
         border: 1px solid #f5c6cb;
     }
-
-    /* Adjustments for fixed image size */
     .category-image {
-        width: 100%; /* Ensures the image stretches to fit the container */
-        max-height: 350px; /* Ensures a fixed height */
-        object-fit: cover; /* Makes sure the image fits in the container without distortion */
-        border-radius: 8px; /* Optional: for rounded corners */
+        width: 100%;
+        max-height: 350px; 
+        object-fit: cover; 
+        border-radius: 8px; 
     }
 </style>
 
