@@ -68,14 +68,20 @@ $isAdmin = $userController->isAdmin(); // Get the flag
                         <h3><?php echo htmlspecialchars($product['name']); ?></h3>
                         <p class="price">Price: $<?php echo number_format($product['price'], 2); ?></p>
 
-                        <div class="product-actions">
-                             <a href="index.php?controller=Product&action=viewProductDetails&product_id=<?php echo $product['id']; ?>">
-                                <button>View Details</button>
-                            </a>
-                             <a href="Controller/Cart/AddtoCart.php?product_id=<?php echo $product['id']; ?>">
-                                <button class="add-cart">Add to Cart</button>
-                            </a>
-                        </div>
+                       <div class="product-actions">
+    <a href="index.php?controller=Product&action=viewProductDetails&product_id=<?php echo $product['id']; ?>">
+        <button>View Details</button>
+    </a>
+    <!-- <a href="Controller/Cart/AddtoCart.php?product_id=<?php echo $product['id']; ?>">
+
+        <button class="add-cart">Add to Cart</button>
+    </a> -->
+
+     <a href="index.php?controller=RCart&action=viewCart">
+            <button class="view-cart-button">Add to Cart</button>
+        </a>
+</div>
+
 
                         <?php if ($isAdmin): ?>
                             <div class="admin-actions">
