@@ -1,0 +1,90 @@
+/* Basic Form Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 0;
+    margin: 0;
+}
+
+.form-container {
+    width: 80%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+textarea {
+    height: 100px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+button[type="button"] {
+    background-color: #007bff;
+    margin-top: 10px;
+}
+
+button[type="button"]:hover {
+    background-color: #0056b3;
+}
+
+/* Additional Styles for Dynamic Fields */
+#image-fields input,
+#color-fields input,
+#size-fields input {
+    margin-bottom: 10px;
+}
+
+.submit-btn {
+    background-color: #007bff;
+    color: white;
+    width: 100%;
+}
+
+.submit-btn:hover {
+    background-color: #0056b3;
+}
