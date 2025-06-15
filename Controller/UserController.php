@@ -2,13 +2,14 @@
 require_once __DIR__ . '/../config/dbConnectionSingelton.php';
 require_once __DIR__ . '/../Model/User/UserFactory.php';
 require_once __DIR__ . '/../View/User/EditProfileView.php';
+require_once __DIR__ . '/../Model/Address/Address.php';
 
 class UserController {
     private $db;
 
     public function __construct() {
         // Initialize the database connection
-        $this->db = Database::getInstance()->getConnection(); // Assuming the Database class has a method to get the connection.
+        $this->db = Database::getInstance()->getConnection();
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
@@ -234,7 +235,7 @@ class UserController {
     public function editProfile() {
         // Ensure the user is logged in
         if (!isset($_SESSION['user_id'])) {
-            header("Location: /View/User/login.php");
+            header("Location: index.php?controller=Auth&action=login");
             exit();
         }
     
@@ -270,19 +271,21 @@ class UserController {
                 exit(); // Ensure no further processing after rendering the view
             } else {
                 // If no user was found, redirect to the home page
-                header("Location: /index.php");
+                header("Location: index.php");
                 exit();
             }
         } catch (PDOException $e) {
             // Handle errors (log them or display a generic message)
-            echo "Error: " . $e->getMessage();
+            error_log("Error in editProfile: " . $e->getMessage());
+            header("Location: index.php?error=ProfileError");
             exit();
         }
     }
+
     public function updateProfile() {
         // Check if user is logged in
         if (!isset($_SESSION['user_id'])) {
-            header("Location: /.php");
+            header("Location: index.php?controller=Auth&action=login");
             exit();
         }
     
@@ -294,8 +297,9 @@ class UserController {
     
         // Validate inputs
         if (empty($firstName) || empty($lastName) || empty($email)) {
-            $this->renderEditForm($userId, "All fields except password are required.");
-            return;
+            $_SESSION['profile_error'] = "All fields except password are required.";
+            header("Location: index.php?controller=User&action=editProfile");
+            exit();
         }
     
         try {
@@ -306,8 +310,9 @@ class UserController {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
             if ($result) {
-                $this->renderEditForm($userId, "Email address is already taken by another user.");
-                return;
+                $_SESSION['profile_error'] = "Email address is already taken by another user.";
+                header("Location: index.php?controller=User&action=editProfile");
+                exit();
             }
     
             // Update the user profile in the database
@@ -326,17 +331,158 @@ class UserController {
     
             // Update session with new email
             $_SESSION['email'] = $email;
+            $_SESSION['first_name'] = $firstName;
     
-            // Redirect to home page
-            header("Location: index.php");
+            // Redirect to home page with success message
+            header("Location: index.php?message=ProfileUpdated");
             exit();
     
         } catch (PDOException $e) {
-            // Handle error (log or show error message)
-            $this->renderEditForm($userId, "An error occurred while updating your profile. Please try again.");
+            error_log("Error in updateProfile: " . $e->getMessage());
+            $_SESSION['profile_error'] = "An error occurred while updating your profile. Please try again.";
+            header("Location: index.php?controller=User&action=editProfile");
+            exit();
+        }
+    }
+
+    public function addresses() {
+        // Ensure the user is logged in
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: index.php?controller=Auth&action=login");
+            exit();
+        }
+
+        $userId = $_SESSION['user_id'];
+        
+        try {
+            // Create Address model instance with database connection
+            $addressModel = new Address($this->db);
+            
+            // Get user's addresses
+            $userAddresses = $addressModel->getUserAddresses($userId);
+            
+            // Include the addresses view
+            require_once __DIR__ . '/../View/User/addresses.php';
+            
+        } catch (Exception $e) {
+            error_log("Error in addresses: " . $e->getMessage());
+            $_SESSION['error'] = "Failed to load addresses. Please try again.";
+            header("Location: index.php");
+            exit();
         }
     }
     
+    public function getStates() {
+        if (!isset($_GET['countryId'])) {
+            echo json_encode([]);
+            return;
+        }
+
+        try {
+            $addressModel = new Address($this->db);
+            $states = $addressModel->getChildren($_GET['countryId']);
+            echo json_encode($states);
+        } catch (Exception $e) {
+            error_log("Error in getStates: " . $e->getMessage());
+            echo json_encode([]);
+        }
+    }
+
+    public function getCities() {
+        if (!isset($_GET['stateId'])) {
+            echo json_encode([]);
+            return;
+        }
+
+        try {
+            $addressModel = new Address($this->db);
+            $cities = $addressModel->getChildren($_GET['stateId']);
+            echo json_encode($cities);
+        } catch (Exception $e) {
+            error_log("Error in getCities: " . $e->getMessage());
+            echo json_encode([]);
+        }
+    }
+
+    public function addAddress() {
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: index.php?controller=Auth&action=login");
+            exit();
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+            $cityId = $_POST['city'] ?? null;
+            $addressLine1 = $_POST['addressLine1'] ?? '';
+            $addressLine2 = $_POST['addressLine2'] ?? '';
+            $isDefault = isset($_POST['isDefault']);
+
+            if (!$cityId || !$addressLine1) {
+                throw new Exception("Required fields are missing");
+            }
+
+            $addressModel = new Address($this->db);
+            $result = $addressModel->addUserAddress($userId, $cityId, $addressLine1, $addressLine2, $isDefault);
+
+            if ($result) {
+                header("Location: index.php?controller=User&action=addresses&success=AddressAdded");
+            } else {
+                throw new Exception("Failed to add address");
+            }
+        } catch (Exception $e) {
+            error_log("Error in addAddress: " . $e->getMessage());
+            $_SESSION['error'] = "Failed to add address. Please try again.";
+            header("Location: index.php?controller=User&action=addresses");
+        }
+        exit();
+    }
+
+    public function setDefaultAddress() {
+        if (!isset($_SESSION['user_id']) || !isset($_GET['addressId'])) {
+            echo json_encode(['success' => false]);
+            return;
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+            $addressId = $_GET['addressId'];
+            $addressModel = new Address($this->db);
+            
+            // First, unset all default addresses
+            $query = "UPDATE user_address SET is_default = FALSE WHERE user_id = ?";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([$userId]);
+
+            // Then set the new default
+            $query = "UPDATE user_address SET is_default = TRUE WHERE id = ? AND user_id = ?";
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([$addressId, $userId]);
+
+            echo json_encode(['success' => $result]);
+        } catch (Exception $e) {
+            error_log("Error in setDefaultAddress: " . $e->getMessage());
+            echo json_encode(['success' => false]);
+        }
+    }
+
+    public function deleteAddress() {
+        if (!isset($_SESSION['user_id']) || !isset($_GET['addressId'])) {
+            echo json_encode(['success' => false]);
+            return;
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+            $addressId = $_GET['addressId'];
+            $addressModel = new Address($this->db);
+            $result = $addressModel->deleteUserAddress($addressId, $userId);
+            echo json_encode(['success' => $result]);
+        } catch (Exception $e) {
+            error_log("Error in deleteAddress: " . $e->getMessage());
+            echo json_encode(['success' => false]);
+        }
+    }
+
     private function renderEditForm($userId, $error = null) {
         try {
             // Fetch user from the database
@@ -393,6 +539,24 @@ if (isset($_GET['action'])) {
             break;
         case 'updateProfile':
             $controller->updateProfile();
+            break;
+        case 'addresses':
+            $controller->addresses();
+            break;
+        case 'getStates':
+            $controller->getStates();
+            break;
+        case 'getCities':
+            $controller->getCities();
+            break;
+        case 'addAddress':
+            $controller->addAddress();
+            break;
+        case 'setDefaultAddress':
+            $controller->setDefaultAddress();
+            break;
+        case 'deleteAddress':
+            $controller->deleteAddress();
             break;
         default:
             echo "Invalid action.";

@@ -4,19 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categories</title>
-    <link rel="stylesheet" href="assets/css/categories.css">
+    <link rel="stylesheet" href="/swe_master/assets/css/categories.css">
 </head>
 <body>
 <div class="header">
     <h1>HomePage</h1>
     <div class="auth-buttons">
+        <a href="index.php?controller=Contact&action=showContact" class="contact-button">Contact Us</a>
         <?php if ($isLoggedIn): ?>
             <span class="welcome-message">Welcome, <?php echo htmlspecialchars($_SESSION['first_name'] ?? 'User'); ?>!</span>
-            <a href="Controller/UserController.php?action=editProfile"> 
-            <button class="edit-profile-button">Edit Profile</button>
-                    </a>
-                <a href="/index.php?controller=User&action=logout">
-
+            <?php if ($isAdmin): ?>
+                <a href="index.php?controller=AdminDashboard&action=index">
+                    <button class="admin-dashboard-button">Admin Dashboard</button>
+                </a>
+            <?php endif; ?>
+            <a href="index.php?controller=User&action=editProfile"> 
+                <button class="edit-profile-button">Edit Profile</button>
+            </a>
+            <a href="index.php?controller=User&action=addresses">
+                <button class="addresses-button">My Addresses</button>
+            </a>
+            <a href="index.php?controller=User&action=logout">
                 <button class="logout-button">Logout</button>
             </a>
         <?php else: ?>
@@ -43,11 +51,11 @@
     <?php endif; ?>
     <?php if (isset($_SESSION['login_error'])): ?>
         <p class="feedback error"><?php echo htmlspecialchars($_SESSION['login_error']); ?></p>
-        <?php unset($_SESSION['login_error']); // Clear message after displaying ?>
+        <?php unset($_SESSION['login_error']);  ?>
     <?php endif; ?>
     <?php if (isset($_SESSION['register_error'])): ?>
         <p class="feedback error"><?php echo htmlspecialchars($_SESSION['register_error']); ?></p>
-        <?php unset($_SESSION['register_error']); // Clear message after displaying ?>
+        <?php unset($_SESSION['register_error']);  ?>
     <?php endif; ?>
 
     <?php if ($isAdmin): ?>
@@ -113,10 +121,10 @@
 </div>
 
 <div class="footer">
-    <p>&copy; <?php echo date("Y"); ?> Your Company Name. All rights reserved.</p>
+    <p>&copy; <?php echo date("Y"); ?> SYS. All rights reserved.</p>
 </div>
 
-<script src="assets/js/script.js"></script>
+<script src="/swe_master/assets/js/script.js"></script>
 <style>
     .feedback {
         padding: 10px 15px;
@@ -135,13 +143,38 @@
         background-color: #f8d7da;
         border: 1px solid #f5c6cb;
     }
-
-    /* Adjustments for fixed image size */
     .category-image {
-        width: 100%; /* Ensures the image stretches to fit the container */
-        max-height: 350px; /* Ensures a fixed height */
-        object-fit: cover; /* Makes sure the image fits in the container without distortion */
-        border-radius: 8px; /* Optional: for rounded corners */
+        width: 100%;
+        max-height: 350px; 
+        object-fit: cover; 
+        border-radius: 8px; 
+    }
+    .admin-dashboard-button {
+        background-color: #2c3e50;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+    .admin-dashboard-button:hover {
+        background-color: #34495e;
+    }
+    .contact-button {
+        background-color: #27ae60;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .contact-button:hover {
+        background-color: #219a52;
     }
 </style>
 

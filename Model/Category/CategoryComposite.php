@@ -8,6 +8,51 @@ require_once __DIR__ . '/ICategory.php'; // Adjusted path assuming ICategory is 
 // but getProducts currently returns raw data.
 // require_once __DIR__ . '/../products/Product.php';
 
+abstract class CategoryComponent {
+    abstract public function getId();
+    abstract public function getName();
+    abstract public function getProducts();
+}
+
+class Category extends CategoryComponent {
+    private $id;
+    private $name;
+    private $image;
+    private $parentId;
+    private $children = [];
+
+    public function __construct($id, $name, $image = null, $parentId = null) {
+        $this->id = $id;
+        $this->name = $name;
+        $this->image = $image;
+        $this->parentId = $parentId;
+    }
+
+    public function getId() {
+        return $this->id;
+    }
+
+    public function getName() {
+        return $this->name;
+    }
+
+    public function getProducts() {
+        $products = [];
+        foreach ($this->children as $child) {
+            $products = array_merge($products, $child->getProducts());
+        }
+        return $products;
+    }
+
+    public function addChild(CategoryComponent $child) {
+        $this->children[] = $child;
+    }
+
+    public function getChildren() {
+        return $this->children;
+    }
+}
+
 class CategoryComposite implements ICategory {
     protected $conn;
     protected $table = 'categories';

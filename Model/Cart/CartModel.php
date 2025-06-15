@@ -87,6 +87,11 @@ class CartModel {
     }
 
     public function getCartItems() {
+        $cartId = $this->getCartIdByUserId($this->userId);
+        if (!$cartId) {
+            return [];
+        }
+
         $stmt = $this->db->prepare("
             SELECT
                 p.id AS product_id,
@@ -95,11 +100,60 @@ class CartModel {
                 ci.quantity,
                 (ci.quantity * p.price) AS total_price
             FROM cartitem ci
-            INNER JOIN cart c ON ci.cart_id = c.cart_id
+            JOIN products p ON ci.product_id = p.id
+            LEFT JOIN productimages pi ON p.id = pi.product_id
+            WHERE ci.cart_id = :cart_id
+            GROUP BY ci.cart_item_id
+            ORDER BY ci.cart_item_id DESC
+        ");
+        
+        $stmt->execute(['cart_id' => $cartId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Method to get cart total
+    public function getCartTotal() {
+        $cartId = $this->getCartIdByUserId($this->userId);
+        if (!$cartId) {
+            return 0;
+        }
+
+        $stmt = $this->db->prepare("
+            SELECT SUM(ci.quantity * p.price) as total
+            FROM cartitem ci
             INNER JOIN products p ON ci.product_id = p.id
-            WHERE c.user_id = :user_id
+            WHERE ci.cart_id = :cart_id
+        ");
+        $stmt->execute(['cart_id' => $cartId]);
+        return $stmt->fetchColumn() ?: 0;
+    }
+
+    public function clearCart() {
+        $cartId = $this->getCartIdByUserId($this->userId);
+        if ($cartId) {
+            $stmt = $this->db->prepare("DELETE FROM cartitem WHERE cart_id = :cart_id");
+            return $stmt->execute(['cart_id' => $cartId]);
+        }
+        return false;
+    }
+
+    public function getCart() {
+        $stmt = $this->db->prepare("
+            SELECT * FROM cart 
+            WHERE user_id = :user_id
         ");
         $stmt->execute(['user_id' => $this->userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getItemQuantity($cartId, $itemId) {
+        $sql = "SELECT quantity FROM cartitem WHERE cart_id = :cart_id AND cart_item_id = :item_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':cart_id', $cartId, PDO::PARAM_INT);
+        $stmt->bindParam(':item_id', $itemId, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['quantity'] : 0;
     }
 }

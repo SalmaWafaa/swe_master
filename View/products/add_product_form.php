@@ -1,5 +1,5 @@
 <?php
-// Assuming you are passing the $categories array from the controller
+// Assuming you are passing the $categories and $productTypes arrays from the controller
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +12,12 @@
 <body>
     <div class="form-container">
         <h2>Add New Product</h2>
+
+        <?php if (isset($_GET['error']) && $_GET['error'] == 'AddProductFailed'): ?>
+            <div class="error">
+                <strong>There was an issue adding the product. Please try again.</strong>
+            </div>
+        <?php endif; ?>
 
         <form action="index.php?controller=Product&action=handleAddProduct" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="add">
@@ -40,88 +46,95 @@
                 <input type="number" id="quantity" name="quantity" placeholder="Product Quantity" required>
             </div>
 
-            <!-- Product Discount -->
             <!-- Product Category -->
-    <select name="category_id" required>
-    <option value="">Select Category</option>
-    <?php if (!empty($categories)): ?>
-        <?php foreach ($categories as $category): ?>
-            <option value="<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></option>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <option disabled>No categories found</option>
-    <?php endif; ?>
-</select>
+            <div class="form-group">
+                <label for="category_id">Category</label>
+                <select name="category_id" id="category_id" required>
+                    <option value="">Select Category</option>
+                    <?php if (!empty($categories)): ?>
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?= htmlspecialchars($category['id']) ?>"><?= htmlspecialchars($category['name']) ?></option>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <option disabled>No categories found</option>
+                    <?php endif; ?>
+                </select>
+            </div>
 
+            <!-- Product Type -->
+            <div class="form-group">
+                <label for="product_type_id">Product Type</label>
+                <select id="product_type_id" name="product_type_id" required>
+                    <option value="">Select Product Type</option>
+                    <?php if (!empty($productTypes)): ?>
+                        <?php foreach ($productTypes as $productType): ?>
+                            <option value="<?= htmlspecialchars($productType['id']) ?>"><?= htmlspecialchars($productType['name']) ?></option>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <option disabled>No product types found</option>
+                    <?php endif; ?>
+                </select>
+            </div>
 
-<div class="form-group">
-     <label for="product_type_id">Product Type</label>
-     <select id="product_type_id" name="product_type_id" required>
-         <option value="">Select Product Type</option>
-         <?php if (!empty($productTypes)): ?>
-             <?php foreach ($productTypes as $productType): ?>
-                 <option value="<?= htmlspecialchars($productType['id']) // Assuming array access ?>"><?= htmlspecialchars($productType['name']) ?></option>
-             <?php endforeach; ?>
-         <?php else: ?>
-             <option disabled>No product types found</option>
-         <?php endif; ?>
-     </select>
- </div>
+            <!-- Product On Sale -->
+            <div class="form-group">
+                <label for="on_sale">On Sale?</label>
+                <select id="on_sale" name="on_sale">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
 
- <div class="form-group">
-      <label for="on_sale">On Sale?</label>
-      <select id="on_sale" name="on_sale">
-          <option value="0">No</option>
-          <option value="1">Yes</option>
-      </select>
-  </div>
             <!-- Product Images -->
             <h3>Product Images (URLs)</h3>
-    <div id="image-fields">
-        <input type="text" name="images[]" placeholder="Image URL" required>
+            <div id="image-fields">
+                <input type="text" name="images[]" placeholder="Image URL" required>
+            </div>
+            <button type="button" onclick="addImageField()">+ Add Image</button>
+
+            <!-- Product Colors -->
+            <h3>Product Colors</h3>
+            <div id="color-fields">
+                <input type="text" name="colors[]" placeholder="Color Name" required>
+            </div>
+            <button type="button" onclick="addColorField()">+ Add Color</button>
+
+            <!-- Product Sizes -->
+            <h3>Product Sizes</h3>
+            <div id="size-fields">
+                <input type="text" name="sizes[]" placeholder="Size Name" required>
+            </div>
+            <button type="button" onclick="addSizeField()">+ Add Size</button>
+
+            <!-- Submit Button -->
+            <button type="submit">Add Product</button>
+        </form>
     </div>
-    <button type="button" onclick="addImageField()">+ Add Image</button>
 
-    <h3>Product Colors</h3>
-    <div id="color-fields">
-        <input type="text" name="colors[]" placeholder="Color Name" required>
-    </div>
-    <button type="button" onclick="addColorField()">+ Add Color</button>
+    <script>
+        function addImageField() {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'images[]';
+            input.placeholder = 'Image URL';
+            document.getElementById('image-fields').appendChild(input);
+        }
 
-    <h3>Product Sizes</h3>
-    <div id="size-fields">
-        <input type="text" name="sizes[]" placeholder="Size Name" required>
-    </div>
-    <button type="button" onclick="addSizeField()">+ Add Size</button>
+        function addColorField() {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'colors[]';
+            input.placeholder = 'Color Name';
+            document.getElementById('color-fields').appendChild(input);
+        }
 
-    <button type="submit">Add Product</button>
-</form>
-
-<script>
-    function addImageField() {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'images[]';
-        input.placeholder = 'Image URL';
-        document.getElementById('image-fields').appendChild(input);
-    }
-
-    function addColorField() {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'colors[]';
-        input.placeholder = 'Color Name';
-        document.getElementById('color-fields').appendChild(input);
-    }
-
-    function addSizeField() {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'sizes[]';
-        input.placeholder = 'Size Name';
-        document.getElementById('size-fields').appendChild(input);
-    }
-</script>
-
+        function addSizeField() {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'sizes[]';
+            input.placeholder = 'Size Name';
+            document.getElementById('size-fields').appendChild(input);
+        }
+    </script>
 </body>
 </html>
