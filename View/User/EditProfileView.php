@@ -97,11 +97,12 @@ class EditProfileView {
         <body>
             <div class="profile-form">
                 <h2>Edit Profile</h2>
-                <?php if ($error): ?>
-                    <div class="error"><?= htmlspecialchars($error) ?></div>
+                <?php if (isset($_SESSION['profile_error'])): ?>
+                    <div class="error"><?= htmlspecialchars($_SESSION['profile_error']) ?></div>
+                    <?php unset($_SESSION['profile_error']); ?>
                 <?php endif; ?>
                 
-                <form method="POST" action="/index.php?controller=User&action=updateProfile">
+                <form method="POST" action="index.php?controller=User&action=updateProfile">
                     <div class="form-group">
                         <label for="firstName">First Name:</label>
                         <input type="text" id="firstName" name="firstName" 
@@ -139,7 +140,6 @@ class EditProfileView {
         </body>
         </html>
         <?php
-        exit(); // Add exit to prevent any further output
     }
 }
 ?>

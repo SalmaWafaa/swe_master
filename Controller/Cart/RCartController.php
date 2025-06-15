@@ -3,18 +3,34 @@ session_start();
 
 // FIXED PATH
 require_once __DIR__ . '/../../Model/Cart/CartModel.php';
+require_once __DIR__ . '/../../Model/CartTemplate.php';
 
 class RCartController {
+    private $cartModel;
+
+    public function __construct() {
+        if (isset($_SESSION['user_id'])) {
+            $this->cartModel = CartModel::getInstance($_SESSION['user_id']);
+        }
+    }
+
     public function viewCart() {
         if (!isset($_SESSION['user_id'])) {
-            die("You must be logged in to view your cart.");
+            header('Location: /swe_master/index.php?controller=User&action=login');
+            exit;
         }
 
-        $userId = $_SESSION['user_id'];
-        $cartModel = CartModel::getInstance($userId);
-        $cartItems = $cartModel->getCartItems();
+        $cart = $this->cartModel->getCart();
+        if (!$cart) {
+            $cartItems = [];
+            $total = 0;
+        } else {
+            $cartItems = $this->cartModel->getCartItems();
+            $total = $this->cartModel->getCartTotal();
+        }
 
-        require_once __DIR__ . '/../../View/Cart/CartView.php';
-
+        // Use the template pattern
+        $template = new CartTemplate($cartItems, $total);
+        $template->render();
     }
 }

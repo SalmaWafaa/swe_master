@@ -49,9 +49,10 @@ class CategoryController {
      * View products belonging to a specific subcategory.
      * (No admin check needed to view products usually)
      */
-    public function viewSubcategoryProducts(int $subcategoryId) {
+    public function viewSubcategoryProducts($subcategoryId) {
         $categoryModel = new CategoryComposite();
         $subcategory = $categoryModel->getSubcategoryById($subcategoryId);
+        $productModel = new ProductModel();
 
         if ($subcategory) {
             $products = $subcategory->getProducts();

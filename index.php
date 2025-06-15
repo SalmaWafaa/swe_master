@@ -5,7 +5,8 @@ spl_autoload_register(function ($class_name) {
         __DIR__ . '/Controller/',
         __DIR__ . '/Model/Products/',
         __DIR__ . '/Controller/Cart/',
-            
+        __DIR__ . '/Model/User/',
+        __DIR__ . '/View/User/'
     ];
 
     $class_name = str_replace('\\', '/', $class_name);
@@ -41,53 +42,59 @@ try {
 
     // Check if the action method exists in the controller
     if (!method_exists($controllerInstance, $action)) {
-        throw new Exception("Action '{$action}' not found in controller '{$controllerClassName}'.");
+        $errorController = new ErrorController();
+        $errorController->invalidAction();
+        exit;
     }
 
     // Prepare parameters for the action method
     $params = [];
     $controllerName = $_GET['controller'] ?? 'Category'; // Default controller
     $actionName = $_GET['action'] ?? 'listCategories';  // Default action
-    // If the action is 'deleteProduct', pass the product ID
+
+    // Special handling for different controllers
     if ($controllerName === 'Product') {
         if ($actionName === 'addProduct' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $actionName = 'handleAddProduct'; // Map POST request to handler method
+            $actionName = 'handleAddProduct';
         } elseif ($actionName === 'addProduct' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-             $actionName = 'showAddProductForm'; // Map GET request to form display method
+            $actionName = 'showAddProductForm';
         } elseif ($actionName === 'updateProduct' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $actionName = 'updateProductPost'; // Map POST update to handler
+            $actionName = 'updateProductPost';
         } elseif ($actionName === 'editProduct' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-             $actionName = 'editProduct'; // Keep GET for edit form display
-             // Note: The edit form POSTs to action=updateProduct, which gets mapped above
+            $actionName = 'editProduct';
         }
-        // Add similar mappings if needed for other controllers/actions (e.g., profile update)
     } elseif ($controllerName === 'User' && $actionName === 'updateProfile' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-         $actionName = 'handleUpdateProfile'; // Example mapping
-    }
-    elseif ($controllerName === 'Cart') {
+        $actionName = 'handleUpdateProfile';
+    } elseif ($controllerName === 'Cart') {
         if ($actionName === 'addToCart') {
             require_once __DIR__ . '/Controller/Cart/AddtoCart.php';
             exit();
+        } elseif ($actionName === 'viewCart') {
+            require_once __DIR__ . '/Controller/Cart/CartController.php';
+            $cartController = new RCartController();
+            $cartController->viewCart();
+            exit();
         }
-    }
-    elseif ($controllerName === 'Cart' && $actionName === 'viewCart') {
-        require_once __DIR__ . '/Controller/Cart/CartController.php';
-        $cartController = new RCartController();
-        $cartController->viewCart();
-        exit();
-    }
-
-    else {
+    } elseif ($controllerName === 'AdminDashboard') {
+        // Special handling for admin dashboard actions
+        if ($actionName === 'updateStockPrice' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $params = [$_POST];
+        } elseif ($actionName === 'deleteCustomerAjax' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $params = [$_POST];
+        }
+    } else {
         // For other actions, pass only the relevant GET parameters
         $params = array_values(array_filter($_GET, function($key) {
             return $key !== 'controller' && $key !== 'action';
         }, ARRAY_FILTER_USE_KEY));
     }
     
-    // Call the action method with the prepared parameters
-    call_user_func_array([$controllerInstance, $action], $params);
+    // Call the action method
+    call_user_func_array([$controllerInstance, $actionName], $params);
+
 } catch (Exception $e) {
-    die("Error: " . $e->getMessage());
+    $errorController = new ErrorController();
+    $errorController->showError('Error', $e->getMessage());
 }
 
 // session_start();
@@ -173,3 +180,19 @@ try {
 // } catch (Exception $e) {
 //     die("Error: " . $e->getMessage());
 // }
+
+// Size conversion routes
+if (isset($_GET['controller']) && $_GET['controller'] === 'SizeConversion') {
+    $controller = new SizeConversionController();
+    
+    if (isset($_GET['action'])) {
+        switch ($_GET['action']) {
+            case 'convertSize':
+                $controller->convertSize();
+                break;
+            case 'getAvailableSystems':
+                $controller->getAvailableSystems();
+                break;
+        }
+    }
+}

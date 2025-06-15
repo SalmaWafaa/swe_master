@@ -1,23 +1,32 @@
 <?php
 
 abstract class ProductFactory {
-    abstract public function createProduct($id, $name, $description, $price, $quantity, $sizes, $colors, $images, $category, $subcategory);
+    abstract public function createProduct($data);
 }
 
-
 class ConcreteProductFactory extends ProductFactory {
-    public function createProduct($id, $name, $description, $price, $quantity, $sizes, $colors, $images, $category, $subcategory) {
-        // Depending on the type of product, return the appropriate class
-        switch ($category) {
-            case 'Shirt':
-                return new BasicShirt($id, $name, $description, $price, $quantity, $sizes, $colors, $images, $category, $subcategory);
-            case 'Pants':
-                return new BasicPants($id, $name, $description, $price, $quantity, $sizes, $colors, $images, $category, $subcategory);
-            case 'Skirt':
-                return new BasicSkirt($id, $name, $description, $price, $quantity, $sizes, $colors, $images, $category, $subcategory);
-            default:
-                throw new Exception("Product type not found.");
-        }
+    public function createProduct($data) {
+        $product = new Product();
+        $product->setId($data['id'] ?? null);
+        $product->setName($data['name']);
+        $product->setDescription($data['description'] ?? '');
+        $product->setPrice($data['price']);
+        $product->setStock($data['stock'] ?? 0);
+        $product->setCategoryId($data['category_id']);
+        $product->setImageUrl($data['image_url'] ?? null);
+        return $product;
+    }
+
+    public static function createProductFromRow($row) {
+        return self::createProduct([
+            'id' => $row['id'],
+            'name' => $row['name'],
+            'description' => $row['description'],
+            'price' => $row['price'],
+            'stock' => $row['stock'],
+            'category_id' => $row['category_id'],
+            'image_url' => $row['image_url']
+        ]);
     }
 }
 ?>

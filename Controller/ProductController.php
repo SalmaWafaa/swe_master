@@ -1,9 +1,9 @@
 <?php
-require_once 'C:/xampp/htdocs/swe_master/Model/Products/AbstractProduct.php';
-require_once 'C:/xampp/htdocs/swe_master/Model/Products/ProductModel.php';
-require_once 'C:/xampp/htdocs/swe_master/Model/Products/ProductIterator.php';
-require_once 'C:/xampp/htdocs/swe_master/Model/Products/ProductFactory.php';
-require_once 'C:/xampp/htdocs/swe_master/Model/Category/CategoryComposite.php';
+require_once __DIR__ . '/../Model/Products/AbstractProduct.php';
+require_once __DIR__ . '/../Model/Products/ProductModel.php';
+require_once __DIR__ . '/../Model/Products/ProductIterator.php';
+require_once __DIR__ . '/../Model/Products/ProductFactory.php';
+require_once __DIR__ . '/../Model/Category/CategoryComposite.php';
 
 class ProductController {
     private ProductModel $productModel;

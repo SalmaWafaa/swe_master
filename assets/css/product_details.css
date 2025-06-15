@@ -1,0 +1,229 @@
+/* Product Details Page Styles */
+.product-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+}
+
+.product-container h1 {
+    font-size: 2.5em;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.description {
+    color: #34495e;
+    line-height: 1.8;
+    margin-bottom: 25px;
+    font-size: 1.1em;
+}
+
+.price {
+    font-size: 1.8em;
+    color: #e74c3c;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+/* Product Images Section */
+.product-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.product-image {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* Size Converter Section */
+.size-selector {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 30px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.size-selector h3 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 1.4em;
+    font-weight: 600;
+}
+
+.size-input-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.size-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1.1em;
+    transition: border-color 0.3s ease;
+}
+
+.size-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.system-select {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1.1em;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.system-select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.convert-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    min-width: 140px;
+}
+
+.convert-button:hover {
+    background-color: #218838;
+}
+
+.conversion-result {
+    margin-top: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.conversion-result.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.conversion-result.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Product Options Section */
+.product-options {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 40px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.option-group {
+    margin-bottom: 25px;
+}
+
+.option-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.option-group select,
+.option-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1.1em;
+    transition: border-color 0.3s ease;
+}
+
+.option-group select:focus,
+.option-group input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.add-to-cart-btn {
+    width: 100%;
+    padding: 15px 25px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .product-container {
+        padding: 15px;
+    }
+
+    .product-container h1 {
+        font-size: 2em;
+    }
+
+    .product-images {
+        grid-template-columns: 1fr;
+    }
+
+    .product-image {
+        height: 350px;
+    }
+
+    .size-input-group {
+        flex-direction: column;
+    }
+
+    .size-input,
+    .system-select,
+    .convert-button {
+        width: 100%;
+    }
+
+    .convert-button {
+        margin-top: 10px;
+    }
+
+    .product-options {
+        padding: 20px;
+    }
+} 
