@@ -1,5 +1,5 @@
 <?php
-require_once 'E:\xampp\htdocs\swe_master\config\Database.php';
+require_once 'E:\xampp\htdocs\ecommerce_master\config\Database.php';
 
 // class Order {
 //     private $id;

@@ -47,17 +47,23 @@ class CartModel {
    
     public function getCartItems() {
         $stmt = $this->db->prepare("
-            SELECT 
-                p.id,
-                p.name,
+            SELECT
+                p.id AS product_id,     -- Alias p.id to product_id for consistency with controller expectation
+                p.name AS product_name,
                 ci.quantity,
-                p.price, 
-                (ci.quantity * p.price) AS total_price
-            FROM cartitem ci
-            INNER JOIN cart c ON ci.cart_id = c.cart_id
-            INNER JOIN products p ON ci.product_id = p.id
-            WHERE c.user_id = :user_id
+                p.price,
+                (ci.quantity * p.price) AS total_item_price -- Changed alias for clarity
+            FROM
+                cartitem ci              -- Table for individual cart items
+            INNER JOIN
+                cart c ON ci.cart_id = c.cart_id -- Join to get cart details (specifically user_id)
+            INNER JOIN
+                products p ON ci.product_id = p.id -- Join to get product details (name, price)
+            WHERE
+                c.user_id = :user_id     -- Use named parameter :user_id
         ");
+
+        
         $stmt->execute(['user_id' => $this->userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

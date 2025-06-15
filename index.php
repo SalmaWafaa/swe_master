@@ -5,7 +5,8 @@ spl_autoload_register(function ($class_name) {
         __DIR__ . '/Controller/',
         __DIR__ . '/Model/Products/',
         __DIR__ . '/Controller/Cart/',
-            
+        __DIR__ . '/Controller/Order/',
+        __DIR__ . '/Controller/Payment/', // This is correct ✅
     ];
 
     $class_name = str_replace('\\', '/', $class_name);
@@ -17,66 +18,58 @@ spl_autoload_register(function ($class_name) {
             return;
         }
     }
+
+    // 🔴 Shows which class was not found
     die("Class '{$class_name}' not found.");
 });
 
-// Database configuration
+// Database config
 require_once __DIR__ . '/config/dbConnectionSingelton.php';
 
-// Get the controller and action from the URL
-$controller = $_GET['controller'] ?? 'Category'; // Default controller
-$action = $_GET['action'] ?? 'listCategories';  // Default action
+// Default routing
+$controllerName = $_GET['controller'] ?? 'Category';
+$actionName     = $_GET['action'] ?? 'listCategories';
 
-// Construct the controller class name
-$controllerClassName = ucfirst($controller) . 'Controller';
+// Controller class name
+$controllerClassName = ucfirst($controllerName) . 'Controller';
 
 try {
-    // Check if the controller class exists
+    // 🔍 Check controller file and class
     if (!class_exists($controllerClassName)) {
         throw new Exception("Controller '{$controllerClassName}' not found.");
     }
 
-    // Instantiate the controller
     $controllerInstance = new $controllerClassName();
 
-    // Check if the action method exists in the controller
-    if (!method_exists($controllerInstance, $action)) {
-        throw new Exception("Action '{$action}' not found in controller '{$controllerClassName}'.");
+    if (!method_exists($controllerInstance, $actionName)) {
+        throw new Exception("Action '{$actionName}' not found in '{$controllerClassName}'.");
     }
 
-    // Prepare parameters for the action method
-    $params = [];
-    $controllerName = $_GET['controller'] ?? 'Category'; // Default controller
-    $actionName = $_GET['action'] ?? 'listCategories';  // Default action
-    // If the action is 'deleteProduct', pass the product ID
+    // Handle special POST mappings (optional cleanup below)
     if ($controllerName === 'Product') {
         if ($actionName === 'addProduct' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $actionName = 'handleAddProduct'; // Map POST request to handler method
-        } elseif ($actionName === 'addProduct' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-             $actionName = 'showAddProductForm'; // Map GET request to form display method
+            $actionName = 'handleAddProduct';
+        } elseif ($actionName === 'addProduct') {
+            $actionName = 'showAddProductForm';
         } elseif ($actionName === 'updateProduct' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $actionName = 'updateProductPost'; // Map POST update to handler
-        } elseif ($actionName === 'editProduct' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-             $actionName = 'editProduct'; // Keep GET for edit form display
-             // Note: The edit form POSTs to action=updateProduct, which gets mapped above
+            $actionName = 'updateProductPost';
+        } elseif ($actionName === 'editProduct') {
+            $actionName = 'editProduct';
         }
-        // Add similar mappings if needed for other controllers/actions (e.g., profile update)
     } elseif ($controllerName === 'User' && $actionName === 'updateProfile' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-         $actionName = 'handleUpdateProfile'; // Example mapping
+        $actionName = 'handleUpdateProfile';
     }
-    
-    
-    else {
-        // For other actions, pass only the relevant GET parameters
-        $params = array_values(array_filter($_GET, function($key) {
-            return $key !== 'controller' && $key !== 'action';
-        }, ARRAY_FILTER_USE_KEY));
-    }
-    
-    // Call the action method with the prepared parameters
-    call_user_func_array([$controllerInstance, $action], $params);
+
+    // Get additional parameters from URL
+    $params = array_values(array_filter($_GET, function($key) {
+        return $key !== 'controller' && $key !== 'action';
+    }, ARRAY_FILTER_USE_KEY));
+
+    // Call the action method
+    call_user_func_array([$controllerInstance, $actionName], $params);
+
 } catch (Exception $e) {
-    die("Error: " . $e->getMessage());
+    die("<strong>Error:</strong> " . $e->getMessage());
 }
 
 // session_start();

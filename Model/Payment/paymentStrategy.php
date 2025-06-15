@@ -1,5 +1,5 @@
 <?php
 interface PaymentStrategy {
-    public function pay($amount);
+    public function pay(int $orderId, float $amount);
 }
 ?>
