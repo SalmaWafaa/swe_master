@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../../config/dbConnectionSingelton.php';
-
-
 class CartModel {
     private $db;
     private $userId;
@@ -13,6 +10,7 @@ class CartModel {
         $this->userId = $userId;
     }
 
+    
     // Ensure a single instance of CartModel per user
     public static function getInstance($userId) {
         if (!isset(self::$instances[$userId])) {
@@ -35,35 +33,72 @@ class CartModel {
         return $this->db->lastInsertId();
     }
 
-    // Method to add an item to the cart
-    public function addItemToCart($cartId, $productId, $quantity) {
-        $stmt = $this->db->prepare("INSERT INTO cartitem (cart_id, product_id, quantity) VALUES (:cart_id, :product_id, :quantity)");
-        $stmt->execute([
-            'cart_id' => $cartId,
-            'product_id' => $productId,
-            'quantity' => $quantity
-        ]);
+    // Method to add an item to the cart or update quantity if it exists
+    public function addItemToCart($cartId, $productId, $quantity = 1) {
+        // Check if item already exists in cart
+        $stmt = $this->db->prepare("SELECT quantity FROM cartitem WHERE cart_id = :cart_id AND product_id = :product_id");
+        $stmt->execute(['cart_id' => $cartId, 'product_id' => $productId]);
+        $existingQuantity = $stmt->fetchColumn();
+
+        if ($existingQuantity) {
+            // Item exists, update quantity
+            $newQuantity = $existingQuantity + $quantity;
+            $updateStmt = $this->db->prepare("UPDATE cartitem SET quantity = :quantity WHERE cart_id = :cart_id AND product_id = :product_id");
+            $updateStmt->execute([
+                'quantity' => $newQuantity,
+                'cart_id' => $cartId,
+                'product_id' => $productId
+            ]);
+        } else {
+            // Item does not exist, insert new item
+            $insertStmt = $this->db->prepare("INSERT INTO cartitem (cart_id, product_id, quantity) VALUES (:cart_id, :product_id, :quantity)");
+            $insertStmt->execute([
+                'cart_id' => $cartId,
+                'product_id' => $productId,
+                'quantity' => $quantity
+            ]);
+        }
     }
-   
+
+    // Method to decrease item quantity in the cart
+    public function decreaseItemQuantity($cartId, $productId) {
+        $stmt = $this->db->prepare("SELECT quantity FROM cartitem WHERE cart_id = :cart_id AND product_id = :product_id");
+        $stmt->execute(['cart_id' => $cartId, 'product_id' => $productId]);
+        $currentQuantity = $stmt->fetchColumn();
+
+        if ($currentQuantity > 1) {
+            $newQuantity = $currentQuantity - 1;
+            $updateStmt = $this->db->prepare("UPDATE cartitem SET quantity = :quantity WHERE cart_id = :cart_id AND product_id = :product_id");
+            $updateStmt->execute([
+                'quantity' => $newQuantity,
+                'cart_id' => $cartId,
+                'product_id' => $productId
+            ]);
+        } else {
+            // If quantity is 1, delete the item instead
+            $this->deleteItemFromCart($cartId, $productId);
+        }
+    }
+
+    // Method to delete an item from the cart
+    public function deleteItemFromCart($cartId, $productId) {
+        $stmt = $this->db->prepare("DELETE FROM cartitem WHERE cart_id = :cart_id AND product_id = :product_id");
+        $stmt->execute(['cart_id' => $cartId, 'product_id' => $productId]);
+    }
+
     public function getCartItems() {
         $stmt = $this->db->prepare("
             SELECT
-                p.id AS product_id,     -- Alias p.id to product_id for consistency with controller expectation
-                p.name AS product_name,
-                ci.quantity,
+                p.id AS product_id,
+                p.name,
                 p.price,
-                (ci.quantity * p.price) AS total_item_price -- Changed alias for clarity
-            FROM
-                cartitem ci              -- Table for individual cart items
-            INNER JOIN
-                cart c ON ci.cart_id = c.cart_id -- Join to get cart details (specifically user_id)
-            INNER JOIN
-                products p ON ci.product_id = p.id -- Join to get product details (name, price)
-            WHERE
-                c.user_id = :user_id     -- Use named parameter :user_id
+                ci.quantity,
+                (ci.quantity * p.price) AS total_price
+            FROM cartitem ci
+            INNER JOIN cart c ON ci.cart_id = c.cart_id
+            INNER JOIN products p ON ci.product_id = p.id
+            WHERE c.user_id = :user_id
         ");
-
-        
         $stmt->execute(['user_id' => $this->userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

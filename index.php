@@ -6,7 +6,7 @@ spl_autoload_register(function ($class_name) {
         __DIR__ . '/Model/Products/',
         __DIR__ . '/Controller/Cart/',
         __DIR__ . '/Controller/Order/',
-        __DIR__ . '/Controller/Payment/', // This is correct ✅
+        __DIR__ . '/Controller/Payment/', 
     ];
 
     $class_name = str_replace('\\', '/', $class_name);
@@ -19,7 +19,7 @@ spl_autoload_register(function ($class_name) {
         }
     }
 
-    // 🔴 Shows which class was not found
+    //  Shows which class was not found
     die("Class '{$class_name}' not found.");
 });
 
